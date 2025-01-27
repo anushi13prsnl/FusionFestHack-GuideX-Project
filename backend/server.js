@@ -1,18 +1,27 @@
 const express = require('express');
 const path = require('path');
-const cors = require('cors'); // Import the cors package
+const cors = require('cors');
+const http = require('http');
+const { Server } = require('socket.io');
 const db = require('./db');
 const User = require('./models/user');
+const Message = require('./models/message'); // Import the Message model
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5713', 'http://localhost:5714'],
+    methods: ['GET', 'POST'],
+  },
+});
+
 app.use(express.json());
-app.use(
-  cors({
-    origin: ['http://localhost:5173', 'http://localhost:5713', 'http://localhost:5714'], // Allow all relevant origins
-    methods: 'GET,POST,PUT,DELETE',
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5713', 'http://localhost:5714'],
+  methods: 'GET,POST,PUT,DELETE',
+  credentials: true,
+}));
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../frontend')));
@@ -129,7 +138,55 @@ app.post('/api/send-coins', async (req, res) => {
   }
 });
 
+// Send message
+app.post('/api/chat', async (req, res) => {
+  const { sender, recipient, message } = req.body;
+  try {
+    const newMessage = new Message({ sender, recipient, message });
+    await newMessage.save();
+    io.to(recipient).emit('receiveMessage', newMessage); // Emit the message to the recipient
+    io.to(sender).emit('receiveMessage', newMessage); // Emit the message to the sender
+    res.json(newMessage);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get chat messages between two users
+app.get('/api/chat/:user1/:user2', async (req, res) => {
+  const { user1, user2 } = req.params;
+  try {
+    const messages = await Message.find({
+      $or: [
+        { sender: user1, recipient: user2 },
+        { sender: user2, recipient: user1 },
+      ],
+    }).sort({ timestamp: 1 });
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// WebSocket connection
+io.on('connection', (socket) => {
+  console.log('a user connected');
+
+  socket.on('join', (userEmail) => {
+    socket.join(userEmail);
+  });
+
+  socket.on('sendMessage', (message) => {
+    io.to(message.recipient).emit('receiveMessage', message);
+    io.to(message.sender).emit('receiveMessage', message);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+});
+
 const port = process.env.PORT || 5000;
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
