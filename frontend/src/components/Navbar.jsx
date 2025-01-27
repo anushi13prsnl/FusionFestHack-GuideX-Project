@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './style.css';
 
@@ -8,6 +8,7 @@ function Navbar() {
   const { user, isAuthenticated, loginWithRedirect, logout } = useAuth0();
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
+  const navigate = useNavigate();
 
   // Check localStorage for logged-in user on page load
   useEffect(() => {
@@ -20,22 +21,26 @@ function Navbar() {
   // Store logged-in user in localStorage and database
   useEffect(() => {
     if (isAuthenticated && user) {
-      const saveUser = async () => {
+      const checkUser = async () => {
         try {
-          const response = await axios.post('/api/users', {
-            email: user.email,
-            name: user.name,
-            picture: user.picture,
-          });
-          setLoggedInUser(response.data);
-          localStorage.setItem('loggedInUser', JSON.stringify(response.data));
+          const response = await axios.get(`/api/users/${user.email}`);
+          if (response.data) {
+            setLoggedInUser(response.data);
+            localStorage.setItem('loggedInUser', JSON.stringify(response.data));
+          } else {
+            navigate('/register');
+          }
         } catch (error) {
-          console.error('Error saving user:', error);
+          if (error.response && error.response.status === 404) {
+            navigate('/register');
+          } else {
+            console.error('Error checking user:', error);
+          }
         }
       };
-      saveUser();
+      checkUser();
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, navigate]);
 
   // Logout handler
   const handleLogout = () => {
@@ -45,7 +50,7 @@ function Navbar() {
   };
 
   return (
-    <nav className="bg-black p-4 fixed top-0 left-0 w-full z-50 shadow-lg shadow-gray-400">
+    <nav className="bg-black p-4 fixed top-0 left-0 w-full z-50 shadow-lg shadow-gray-800">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center gap-4">
           <div className="text-white text-xl font-bold">GuideX</div>
