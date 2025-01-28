@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useNavigate } from 'react-router-dom';
+import Card from './Card'; // Import the Card component
 
 const ConnectPage = () => {
   const { user, isAuthenticated, loginWithRedirect } = useAuth0();
@@ -165,7 +166,7 @@ const ConnectPage = () => {
                 />
                 <span>Has LinkedIn Profile</span>
               </div>
-              {/* <div>
+              <div>
                 <label className="block mb-2">LinkedIn Username</label>
                 <input
                   type="text"
@@ -186,7 +187,7 @@ const ConnectPage = () => {
                   className="w-full p-2 border rounded"
                   placeholder="Enter name"
                 />
-              </div> */}
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -194,36 +195,14 @@ const ConnectPage = () => {
               <p>No users found</p>
             ) : (
               filteredUsers.map((u) => (
-                <div key={u._id} className="bg-white p-4 rounded shadow-md">
-                  {u.picture && (
-                    <img src={u.picture} alt={u.name} className="w-24 h-24 rounded-full mx-auto mb-4" />
-                  )}
-                  <h2 className="text-xl font-bold text-center">{u.name}</h2>
-                  <p className="text-center">Tier: {u.tier}</p>
-                  <p className="text-center">Coins: {u.coins}</p>
-                  {u.linkedInProfile && (
-                    <p className="text-center">
-                      <a href={u.linkedInProfile} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
-                        LinkedIn Profile
-                      </a>
-                    </p>
-                  )}
-                  <div className="flex justify-around mt-4">
-                    <button onClick={() => handleViewProfile(u._id)} className="bg-blue-500 text-white px-4 py-2 rounded">
-                      View Full Profile
-                    </button>
-                    {u.email !== user.email && (
-                      <>
-                        <button onClick={() => handleConnect(u._id)} className="bg-green-500 text-white px-4 py-2 rounded">
-                          Connect
-                        </button>
-                        <button onClick={() => handleSendCoins(u.email)} className="bg-yellow-500 text-white px-4 py-2 rounded">
-                          Send Coins
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
+                <Card
+                  key={u._id}
+                  user={u}
+                  isCurrentUser={u.email === user.email}
+                  onSendCoins={handleSendCoins}
+                  onViewProfile={handleViewProfile}
+                  onConnect={handleConnect}
+                />
               ))
             )}
           </div>
