@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
   age: { type: Number, required: true },
   coins: { type: Number, default: 100 },
   tier: { type: String, default: 'Copper' },
+  bookmarked: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Recommendation' }],
 });
 
 const User = mongoose.model('User', userSchema);

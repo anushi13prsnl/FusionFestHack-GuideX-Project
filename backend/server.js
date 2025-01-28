@@ -6,6 +6,9 @@ const { Server } = require('socket.io');
 const db = require('./db');
 const User = require('./models/user');
 const Message = require('./models/message'); // Import the Message model
+const AreaOfExpertise = require('./models/areaOfExpertise'); // Import the AreaOfExpertise model
+const MCQ = require('./models/mcq'); // Import the MCQ model
+const Recommendation = require('./models/recommendation'); // Import the Recommendation model
 
 const app = express();
 const server = http.createServer(app);
@@ -29,6 +32,97 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend', 'index.html'));
 });
+
+
+
+
+// Get recommendations based on user's areas of expertise
+app.get('/api/recommendations', async (req, res) => {
+  const { email } = req.query;
+  try {
+    const user = await User.findOne({ email });
+    const recommendations = await Recommendation.find({ area: { $in: user.areasOfExpertise } });
+    res.json(recommendations);
+  } catch (error) {
+    res.status(500).send('Error fetching recommendations');
+  }
+});
+
+// Get bookmarked recommendations
+app.get('/api/bookmarked', async (req, res) => {
+  const { email } = req.query;
+  try {
+    const user = await User.findOne({ email }).populate('bookmarked');
+    res.json(user.bookmarked);
+  } catch (error) {
+    res.status(500).send('Error fetching bookmarked recommendations');
+  }
+});
+
+// Bookmark a recommendation
+app.post('/api/bookmark', async (req, res) => {
+  const { email, recommendation } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    user.bookmarked.push(recommendation);
+    await user.save();
+    res.json(user.bookmarked);
+  } catch (error) {
+    res.status(500).send('Error bookmarking recommendation');
+  }
+});
+
+
+
+
+// Get areas of expertise
+app.get('/api/areasOfExpertise', async (req, res) => {
+  try {
+    const areas = await AreaOfExpertise.find();
+    res.json(areas);
+  } catch (error) {
+    res.status(500).send('Error fetching areas of expertise');
+  }
+});
+
+// Get random MCQs based on area
+app.get('/api/mcqs', async (req, res) => {
+  const { area, limit } = req.query;
+  try {
+    const mcqs = await MCQ.aggregate([
+      { $match: { area } },
+      { $sample: { size: parseInt(limit, 10) } },
+    ]);
+    res.json(mcqs);
+  } catch (error) {
+    res.status(500).send('Error fetching MCQs');
+  }
+});
+
+// Get leaderboard
+app.get('/api/leaderboard', async (req, res) => {
+  const { filter } = req.query;
+  let dateFilter = {};
+
+  if (filter === 'daily') {
+    dateFilter = { timestamp: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } };
+  } else if (filter === 'weekly') {
+    const currentDate = new Date();
+    const firstDayOfWeek = currentDate.getDate() - currentDate.getDay();
+    dateFilter = { timestamp: { $gte: new Date(currentDate.setDate(firstDayOfWeek)) } };
+  }
+
+  try {
+    const leaderboard = await User.find(dateFilter).sort({ coins: -1 }).limit(10);
+    res.json(leaderboard);
+  } catch (error) {
+    res.status(500).send('Error fetching leaderboard');
+  }
+});
+
+
+
+
 
 // Register new user
 app.post('/api/users', async (req, res) => {

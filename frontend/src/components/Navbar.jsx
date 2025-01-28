@@ -57,6 +57,8 @@ function Navbar() {
           <div className="flex gap-4">
             <Link to="/" className="text-white hover:text-blue-500">Home</Link>
             <Link to="/connect" className="text-white hover:text-blue-500">Connect</Link>
+            <Link to="/insights" className="text-white hover:text-blue-500">Insights</Link>
+            <Link to="/smart-picks" className="text-white hover:text-blue-500">Smart Picks</Link>
           </div>
         </div>
         <div className="flex items-center gap-4">
