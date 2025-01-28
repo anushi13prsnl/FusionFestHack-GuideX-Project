@@ -138,33 +138,59 @@ app.post('/api/send-coins', async (req, res) => {
   }
 });
 
-// Send message
+// Modified chat route to handle anonymous messages
 app.post('/api/chat', async (req, res) => {
-  const { sender, recipient, message } = req.body;
+  const { sender, recipient, message, isAnonymous } = req.body;
   try {
-    const newMessage = new Message({ sender, recipient, message });
+    const newMessage = new Message({
+      sender: sender,
+      recipient: recipient,
+      message: message,
+      isAnonymous: isAnonymous,
+      senderName: isAnonymous ? 'Anonymous' : sender
+    });
+
     await newMessage.save();
-    io.to(recipient).emit('receiveMessage', newMessage); // Emit the message to the recipient
-    io.to(sender).emit('receiveMessage', newMessage); // Emit the message to the sender
-    res.json(newMessage);
+    
+    // Emit through socket if you're using socket.io
+    if (io) {
+      io.to(recipient).emit('receiveMessage', newMessage);
+    }
+    
+    res.status(201).json(newMessage);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error sending message:', error);
+    res.status(500).json({ error: 'Failed to send message' });
   }
 });
 
-// Get chat messages between two users
+// Modified route to get chat messages
 app.get('/api/chat/:user1/:user2', async (req, res) => {
   const { user1, user2 } = req.params;
   try {
     const messages = await Message.find({
       $or: [
         { sender: user1, recipient: user2 },
-        { sender: user2, recipient: user1 },
-      ],
+        { sender: user2, recipient: user1 }
+      ]
     }).sort({ timestamp: 1 });
-    res.json(messages);
+
+    // Transform messages to hide sender info for anonymous messages
+    const transformedMessages = messages.map(msg => {
+      if (msg.isAnonymous) {
+        return {
+          ...msg.toObject(),
+          sender: 'Anonymous',
+          senderEmail: 'anonymous'
+        };
+      }
+      return msg;
+    });
+
+    res.json(transformedMessages);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error fetching messages:', error);
+    res.status(500).json({ error: 'Failed to fetch messages' });
   }
 });
 
