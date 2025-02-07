@@ -30,7 +30,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/users', formData);
+      await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/users`, formData);
       navigate('/connect');
     } catch (error) {
       console.error('Error registering user:', error);
