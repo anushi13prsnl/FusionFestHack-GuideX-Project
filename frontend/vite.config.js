@@ -10,7 +10,7 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/api': 'REACT_APP_BACKEND_URL',
+      '/api': '${process.env.REACT_APP_BACKEND_URL}',
     },
   },
 })
