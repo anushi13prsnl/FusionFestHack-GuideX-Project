@@ -22,7 +22,8 @@ function Navbar() {
     if (isAuthenticated && user) {
       const checkUser = async () => {
         try {
-          const response = await axios.get(`/api/users/${user.email}`)
+          // const response = await axios.get(`/api/users/${user.email}`)
+          const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/users/${user.email}`);
           if (response.data) {
             setLoggedInUser(response.data)
             localStorage.setItem("loggedInUser", JSON.stringify(response.data))
