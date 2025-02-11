@@ -22,25 +22,29 @@ function Navbar() {
     if (isAuthenticated && user) {
       const checkUser = async () => {
         try {
-          // const response = await axios.get(`/api/users/${user.email}`)
-          const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/users/${user.email}`);
-          if (response.data) {
-            setLoggedInUser(response.data)
-            localStorage.setItem("loggedInUser", JSON.stringify(response.data))
+          const backendURL = process.env.REACT_APP_BACKEND_URL;
+          console.log("Backend URL:", backendURL); // ✅ Print URL for debugging
+  
+          const { data } = await axios.get(`${backendURL}/api/users/${user.email}`);
+          
+          if (data) {
+            setLoggedInUser(data);
+            localStorage.setItem("loggedInUser", JSON.stringify(data));
           } else {
-            navigate("/register")
+            navigate("/register");
           }
         } catch (error) {
           if (error.response && error.response.status === 404) {
-            navigate("/register")
+            navigate("/register");
           } else {
-            console.error("Error checking user:", error)
+            console.error("Error checking user:", error);
           }
         }
-      }
-      checkUser()
+      };
+      checkUser();
     }
-  }, [isAuthenticated, user, navigate])
+  }, [isAuthenticated, user, navigate]);
+  
 
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser")
