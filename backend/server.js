@@ -9,6 +9,7 @@ const Message = require('./models/message'); // Import the Message model
 const AreaOfExpertise = require('./models/areaOfExpertise'); // Import the AreaOfExpertise model
 const MCQ = require('./models/mcq'); // Import the MCQ model
 const Recommendation = require('./models/recommendation'); // Import the Recommendation model
+require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
