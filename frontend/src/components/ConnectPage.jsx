@@ -23,7 +23,7 @@ const ConnectPage = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("${process.env.REACT_APP_BACKEND_URL}/api/users")
+        const response = await axios.get("http://localhost:5000/api/users")
         setUsers(response.data)
         setFilteredUsers(response.data)
       } catch (error) {
@@ -37,14 +37,14 @@ const ConnectPage = () => {
   const handleSendCoins = async (recipientEmail) => {
     if (!user) return
     try {
-      await axios.post("${process.env.REACT_APP_BACKEND_URL}/api/send-coins", {
+      await axios.post("http://localhost:5000/api/send-coins", {
         senderEmail: user.email,
         recipientEmail,
         amount: 5,
       })
       setShowPopup(true)
       setTimeout(() => setShowPopup(false), 3000)
-      const response = await axios.get("${process.env.REACT_APP_BACKEND_URL}/api/users")
+      const response = await axios.get("http://localhost:5000/api/users")
       setUsers(response.data)
       applyFilters(response.data)
     } catch (error) {

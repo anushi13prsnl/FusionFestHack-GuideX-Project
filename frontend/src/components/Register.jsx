@@ -6,9 +6,9 @@ import { useNavigate } from 'react-router-dom';
 const Register = () => {
   const { user } = useAuth0();
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    picture: user?.picture || '',
+    name: user.name,
+    email: user.email,
+    picture: user.picture,
     phoneNumber: '',
     areasOfExpertise: '',
     areasOfInterest: '',
@@ -30,8 +30,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/users`, formData);
-      console.log('User registered:', response.data);
+      await axios.post('/api/users', formData);
       navigate('/connect');
     } catch (error) {
       console.error('Error registering user:', error);

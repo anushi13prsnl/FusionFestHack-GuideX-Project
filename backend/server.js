@@ -14,14 +14,14 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ['http://localhost:5713', 'http://localhost:5714', 'https://fusion-fest-hack-guide-x-project.vercel.app/'],
+    origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5713', 'http://localhost:5714'],
     methods: ['GET', 'POST'],
   },
 });
 
 app.use(express.json());
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5713', 'http://localhost:5714', 'https://fusion-fest-hack-guide-x-project.vercel.app/'],
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5713', 'http://localhost:5714'],
   methods: 'GET,POST,PUT,DELETE',
   credentials: true,
 }));
@@ -130,7 +130,7 @@ app.post('/api/users', async (req, res) => {
   try {
     const newUser = new User({ name, email, picture, phoneNumber, areasOfExpertise, areasOfInterest, availability, experienceLevel, bio, location, linkedInProfile, gender, age, coins: 100, tier: 'Copper' });
     await newUser.save();
-    res.status(201).json(newUser);
+    res.json(newUser);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
