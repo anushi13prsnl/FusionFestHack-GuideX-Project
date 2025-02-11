@@ -22,7 +22,7 @@ const Chat = () => {
   useEffect(scrollToBottom, [messages]);
 
   useEffect(() => {
-    const newSocket = io('http://localhost:5000', {
+    const newSocket = io('REACT_APP_BACKEND_URL', {
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
     });
@@ -37,7 +37,7 @@ const Chat = () => {
   useEffect(() => {
     const fetchRecipientEmail = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/user/${userId}`);
+        const response = await axios.get(`REACT_APP_BACKEND_URL/api/user/${userId}`);
         setRecipientEmail(response.data.email);
       } catch (error) {
         console.error('Error fetching recipient email:', error);
@@ -56,7 +56,7 @@ const Chat = () => {
 
     const fetchMessages = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/chat/${user.email}/${recipientEmail}`);
+        const response = await axios.get(`REACT_APP_BACKEND_URL/api/chat/${user.email}/${recipientEmail}`);
         setMessages(response.data);
       } catch (error) {
         console.error('Error fetching messages:', error);
@@ -90,7 +90,7 @@ const Chat = () => {
     };
 
     try {
-      const response = await axios.post('http://localhost:5000/api/chat', message);
+      const response = await axios.post('REACT_APP_BACKEND_URL/api/chat', message);
       socket.emit('sendMessage', response.data);
       setNewMessage('');
     } catch (error) {
