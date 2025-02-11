@@ -27,14 +27,11 @@ app.use(cors({
 }));
 
 // Serve static files from the React app
-app.use(express.static(path.join(__dirname, '../frontend')));
+app.use(express.static(path.join(__dirname, '../frontend/build')));
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend', 'index.html'));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 });
-
-
-
 
 // Get recommendations based on user's areas of expertise
 app.get('/api/recommendations', async (req, res) => {
@@ -71,9 +68,6 @@ app.post('/api/bookmark', async (req, res) => {
     res.status(500).send('Error bookmarking recommendation');
   }
 });
-
-
-
 
 // Get areas of expertise
 app.get('/api/areasOfExpertise', async (req, res) => {
@@ -119,10 +113,6 @@ app.get('/api/leaderboard', async (req, res) => {
     res.status(500).send('Error fetching leaderboard');
   }
 });
-
-
-
-
 
 // Register new user
 app.post('/api/users', async (req, res) => {
