@@ -10,8 +10,8 @@ import './components/style.css'; // Import custom CSS
 
 const container = document.getElementById('root');
 const root = createRoot(container);
-// const domain = process.env.REACT_APP_AUTH0_DOMAIN;
-// const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID;
+// const domain = import.meta.env.VITE_AUTH0_DOMAIN;
+// const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
 
 root.render(
   <Auth0Provider

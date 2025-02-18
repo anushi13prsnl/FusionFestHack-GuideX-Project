@@ -22,7 +22,7 @@ function Navbar() {
     if (isAuthenticated && user) {
       const checkUser = async () => {
         try {
-          const backendURL = process.env.REACT_APP_BACKEND_URL;
+          const backendURL = import.meta.env.VITE_BACKEND_URL;
           console.log("Backend URL:", backendURL); // ✅ Print URL for debugging
   
           const { data } = await axios.get(`${backendURL}/api/users/${user.email}`);
