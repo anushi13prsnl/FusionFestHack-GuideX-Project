@@ -10,9 +10,9 @@ const AreaOfExpertise = require('./models/areaOfExpertise'); // Import the AreaO
 const MCQ = require('./models/mcq'); // Import the MCQ model
 const Recommendation = require('./models/recommendation'); // Import the Recommendation model
 require('dotenv').config();
-app.use(express.json());
 const app = express();
 const server = http.createServer(app);
+app.use(express.json());
 
 
 const allowedOrigins = [
@@ -23,6 +23,10 @@ const allowedOrigins = [
   'https://fusion-fest-hack-guide-x-project.vercel.app',
   // Add any other frontend URLs here
 ];
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
 
 app.use(cors({
   origin: allowedOrigins,
@@ -41,9 +45,7 @@ const io = new Server(server, {
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../frontend/build')));
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
-});
+
 
 // Get recommendations based on user's areas of expertise
 app.get('/api/recommendations', async (req, res) => {
@@ -138,17 +140,22 @@ app.post('/api/users', async (req, res) => {
   }
 });
 
+
 // Get user data by email
 app.get('/api/users/:email', async (req, res) => {
   const { email } = req.params;
   try {
+    console.log(`Looking for user with email: ${email}`);
     const user = await User.findOne({ email });
     if (user) {
+      console.log('User found:', user.email);
       res.json(user);
     } else {
+      console.log(`No user found with email: ${email}`);
       res.status(404).json({ error: 'User not found' });
     }
   } catch (error) {
+    console.error('Error finding user:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -307,6 +314,12 @@ io.on('connection', (socket) => {
     console.log('user disconnected');
   });
 });
+
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+});
+
 
 const port = process.env.PORT || 5000;
 server.listen(port, () => {
