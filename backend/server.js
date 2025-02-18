@@ -20,7 +20,7 @@ const allowedOrigins = [
   'http://localhost:5174',
   'http://localhost:5713',
   'http://localhost:5714',
-  'https://fusionfesthack-guidex-project.onrender.com',
+  'https://fusion-fest-hack-guide-x-project.vercel.app',
   // Add any other frontend URLs here
 ];
 
