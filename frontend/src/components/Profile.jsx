@@ -1,45 +1,64 @@
-import React, { useState, useEffect } from "react"
-import axios from "axios"
-import { useParams } from "react-router-dom"
-import { Mail, MapPin, Briefcase, GraduationCap, Calendar, User, Linkedin } from "lucide-react"
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useParams } from "react-router-dom";
+import { Mail, MapPin, Briefcase, GraduationCap, Calendar, User, Linkedin } from "lucide-react";
 
 const Profile = () => {
-  const { userId } = useParams()
-  const [user, setUser] = useState(null)
+  const { userId } = useParams();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await axios.get(`/api/user/${userId}`)
-        setUser(response.data)
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/user/${userId}`);
+        setUser(response.data);
       } catch (error) {
-        console.error("Error fetching user:", error)
+        console.error("Error fetching user:", error);
+        setError("Failed to load user data");
+      } finally {
+        setLoading(false);
       }
-    }
+    };
 
-    fetchUser()
-  }, [userId])
+    fetchUser();
+  }, [userId]);
 
-  if (!user) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
       </div>
-    )
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-red-500">{error}</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
   }
 
   const getTierColor = (tier) => {
     switch (tier.toLowerCase()) {
       case "gold":
-        return "bg-yellow-500"
+        return "bg-yellow-500";
       case "silver":
-        return "bg-gray-400"
+        return "bg-gray-400";
       case "bronze":
-        return "bg-orange-500"
+        return "bg-orange-500";
       default:
-        return "bg-blue-500"
+        return "bg-blue-500";
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 py-20 px-4 sm:px-6 lg:px-8">
@@ -134,7 +153,7 @@ const Profile = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default Profile;
