@@ -10,8 +10,8 @@ const AreaOfExpertise = require('./models/areaOfExpertise'); // Import the AreaO
 const MCQ = require('./models/mcq'); // Import the MCQ model
 const Recommendation = require('./models/recommendation'); // Import the Recommendation model
 require('dotenv').config();
-app.use(express.json());
 const app = express();
+app.use(express.json());
 const server = http.createServer(app);
 
 

@@ -15,6 +15,8 @@ const InsightsPage = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [leaderboardFilter, setLeaderboardFilter] = useState('all-time');
   const [quizActive, setQuizActive] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const staticMCQs = {
     frontend: [
@@ -79,15 +81,26 @@ const InsightsPage = () => {
   }, [isAuthenticated]);
 
   useEffect(() => {
-    fetchLeaderboard(leaderboardFilter);
-  }, [leaderboardFilter]);
+    if (isAuthenticated) {
+      fetchLeaderboard(leaderboardFilter);
+    }
+  }, [leaderboardFilter, isAuthenticated]);
 
   const fetchLeaderboard = async (filter) => {
+    setLoading(true);
+    setError(null);
     try {
-      const response = await axios.get(`/api/leaderboard?filter=${filter}`);
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/leaderboard`, {
+        params: { filter },
+        withCredentials: true
+      });
       setLeaderboard(response.data);
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
+      setError('Failed to load leaderboard');
+      setLeaderboard([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -244,54 +257,62 @@ const InsightsPage = () => {
                       <Trophy className="w-6 h-6 text-yellow-500" />
                       <h2 className="text-2xl font-bold">Leaderboard</h2>
                     </div>
-                    <div className="flex justify-center gap-4 mb-6">
-                      {['daily', 'weekly', 'all-time'].map((filter) => (
-                        <button
-                          key={filter}
-                          onClick={() => setLeaderboardFilter(filter)}
-                          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                            leaderboardFilter === filter
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                          }`}
-                        >
-                          {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="space-y-4">
-                      {leaderboard.map((user, index) => (
-                        <div
-                          key={user._id}
-                          className="flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors"
-                        >
-                          <div className="flex items-center space-x-4">
-                            <div className="w-8 h-8 flex items-center justify-center">
-                              {index < 3 ? (
-                                <Award
-                                  className={`w-6 h-6 ${
-                                    index === 0
-                                      ? 'text-yellow-500'
-                                      : index === 1
-                                      ? 'text-gray-400'
-                                      : 'text-orange-500'
-                                  }`}
-                                />
-                              ) : (
-                                <span className="text-gray-600 font-medium">{index + 1}</span>
-                              )}
-                            </div>
-                            <div className="flex-1">
-                              <p className="font-medium text-gray-900">{user.name}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Coins className="w-5 h-5 text-yellow-500" />
-                            <span className="font-semibold">{user.coins}</span>
-                          </div>
+                    {loading ? (
+                      <div className="text-center py-4">Loading...</div>
+                    ) : error ? (
+                      <div className="text-center py-4 text-red-600">{error}</div>
+                    ) : (
+                      <>
+                        <div className="flex justify-center gap-4 mb-6">
+                          {['daily', 'weekly', 'all-time'].map((filter) => (
+                            <button
+                              key={filter}
+                              onClick={() => setLeaderboardFilter(filter)}
+                              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                                leaderboardFilter === filter
+                                  ? 'bg-blue-600 text-white'
+                                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              }`}
+                            >
+                              {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                            </button>
+                          ))}
                         </div>
-                      ))}
-                    </div>
+                        <div className="space-y-4">
+                          {leaderboard.map((user, index) => (
+                            <div
+                              key={user._id}
+                              className="flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              <div className="flex items-center space-x-4">
+                                <div className="w-8 h-8 flex items-center justify-center">
+                                  {index < 3 ? (
+                                    <Award
+                                      className={`w-6 h-6 ${
+                                        index === 0
+                                          ? 'text-yellow-500'
+                                          : index === 1
+                                          ? 'text-gray-400'
+                                          : 'text-orange-500'
+                                      }`}
+                                    />
+                                  ) : (
+                                    <span className="text-gray-600 font-medium">{index + 1}</span>
+                                  )}
+                                </div>
+                                <div className="flex-1">
+                                  <p className="font-medium text-gray-900">{user.name}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Coins className="w-5 h-5 text-yellow-500" />
+                                <span className="font-semibold">{user.coins}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </>
