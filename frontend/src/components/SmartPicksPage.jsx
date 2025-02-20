@@ -18,7 +18,7 @@ const SmartPicksPage = () => {
 
   const fetchRecommendations = async () => {
     try {
-      const response = await axios.get(`/api/recommendations?email=${user.email}`);
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/recommendations?email=${user.email}`);
       setRecommendations(response.data);
       setFilteredRecommendations(response.data);
     } catch (error) {
@@ -28,7 +28,7 @@ const SmartPicksPage = () => {
 
   const fetchBookmarked = async () => {
     try {
-      const response = await axios.get(`/api/bookmarked?email=${user.email}`);
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/bookmarked?email=${user.email}`);
       setBookmarked(response.data);
     } catch (error) {
       console.error('Error fetching bookmarked recommendations:', error);
@@ -37,7 +37,7 @@ const SmartPicksPage = () => {
 
   const handleBookmark = async (recommendation) => {
     try {
-      const response = await axios.post('/api/bookmark', {
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/bookmark`, {
         email: user.email,
         recommendation,
       });
